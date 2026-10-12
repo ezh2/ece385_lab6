@@ -95,6 +95,15 @@ BYTE* MAXbytes_wr(BYTE reg, BYTE nbytes, BYTE* data) {
 	//if return code != 0 print an error
 	//deselect MAX3421E (may not be necessary if you are using SPI peripheral)
 	//return (data + nbytes);
+
+	XSpi_SetSlaveSelect(&SpiInstance ,0x01);
+	u8 WR_BUFF = {0b11110010, 0x01};
+	int rtn_val = XSpi_Transfer(&SpiInstance, WR_BUFF, NULL, 2); // not sure what data type it is
+	if(rtn_val!=0){
+		xil_printf("return not zero");
+	}
+	XSpi_SetSlaveSelect(&SpiInstance ,0x00);
+	return (rtn_val+n bytes); // not done yet
 }
 
 /* Single host register read        */
@@ -107,6 +116,13 @@ BYTE MAXreg_rd(BYTE reg) {
 	//if return code != 0 print an error
 	//deselect MAX3421E (may not be necessary if you are using SPI peripheral)
 	//return val
+	XSpi_SetSlaveSelect(&SpiInstance ,0x01);
+	u8 WR_BUFF = {0x1E, 0x01};
+	if(XSpi_Transfer(&SpiInstance, WR_BUFF, NULL, 2)!=0){
+		xil_printf("return not zero");
+	}
+	XSpi_SetSlaveSelect(&SpiInstance ,0x00);
+	return (); // not done yet
 }
 
 
