@@ -110,17 +110,17 @@ BYTE MAXreg_rd(BYTE reg) {
 	//if return code != 0 print an error
 	//deselect MAX3421E (may not be necessary if you are using SPI peripheral)
 	//return val
-
+	u8 val;
 	XSpi_SetSlaveSelect(&SpiInstance ,0x01);
-	u8 WR_BUFF[2] = {reg+2, val};
-	u8 RD_BUFF[2] = {NULL, 0x13}; // not sure if it is 0x13
-	if(XSpi_Transfer(&SpiInstance, WR_BUFF, NULL, 2)!=0){
+	u8 WR_BUFF[2] = {reg+2, 0x00};
+	u8 RD_BUFF[2] = {NULL, val}; // not sure if it is 0x13
+	if(XSpi_Transfer(&SpiInstance, WR_BUFF, RD_BUFF, 2)!=0){
 		xil_printf("return not zero");
 		XSpi_SetSlaveSelect(&SpiInstance ,0x00);
 		return;
 	}
 	XSpi_SetSlaveSelect(&SpiInstance ,0x00);
-	return (RD_BUFF[1]); // not sure, we only want the latter part of RD_BUFF
+	return (val); // not sure, we only want the latter part of RD_BUFF
 }
 
 
