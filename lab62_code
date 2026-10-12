@@ -117,12 +117,13 @@ BYTE MAXreg_rd(BYTE reg) {
 	//deselect MAX3421E (may not be necessary if you are using SPI peripheral)
 	//return val
 	XSpi_SetSlaveSelect(&SpiInstance ,0x01);
-	u8 WR_BUFF = {0x1E, 0x01};
-	if(XSpi_Transfer(&SpiInstance, WR_BUFF, NULL, 2)!=0){
+	u8 WR_BUFF = {0b10010000, 0x00};
+	u8 RD_BUFF = {NULL, 0x13};
+	if(XSpi_Transfer(&SpiInstance, WR_BUFF, RD_BUFF, 2)!=0){
 		xil_printf("return not zero");
 	}
 	XSpi_SetSlaveSelect(&SpiInstance ,0x00);
-	return (); // not done yet
+	return (RD_BUFF); // not sure, we only want the latter part of RD_BUFF
 }
 
 
