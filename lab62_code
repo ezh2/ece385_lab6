@@ -82,6 +82,7 @@ void MAXreg_wr(BYTE reg, BYTE val) {
 		return;
 	}
 	XSpi_SetSlaveSelect(&SpiInstance ,0x00);
+	return;
 
 }
 
@@ -98,6 +99,15 @@ BYTE* MAXbytes_wr(BYTE reg, BYTE nbytes, BYTE* data) {
 	//deselect MAX3421E (may not be necessary if you are using SPI peripheral)
 	//return (data + nbytes);
 
+	XSpi_SetSlaveSelect(&SpiInstance ,0x01);
+	for (int n=0; n<nbytes-1; n++){
+		u8 WR_BUFF[2] = {reg+2, data[n]};
+		if(XSpi_Transfer(&SpiInstance, WR_BUFF, NULL, 2)!=0){
+			xil_printf("return not zero");
+		}
+	}
+	XSpi_SetSlaveSelect(&SpiInstance ,0x00);
+	return (data+nbytes);
 }
 
 /* Single host register read        */
@@ -110,17 +120,16 @@ BYTE MAXreg_rd(BYTE reg) {
 	//if return code != 0 print an error
 	//deselect MAX3421E (may not be necessary if you are using SPI peripheral)
 	//return val
-	u8 val;
 	XSpi_SetSlaveSelect(&SpiInstance ,0x01);
 	u8 WR_BUFF[2] = {reg, 0x00};
-	u8 RD_BUFF[2] = {NULL, val}; // not sure if it is 0x13
+	u8 RD_BUFF[2] = {NULL, NULL}; // not sure if it is 0x13
 	if(XSpi_Transfer(&SpiInstance, WR_BUFF, RD_BUFF, 2)!=0){
 		xil_printf("return not zero");
 		XSpi_SetSlaveSelect(&SpiInstance ,0x00);
 		return;
 	}
 	XSpi_SetSlaveSelect(&SpiInstance ,0x00);
-	return (val);
+	return (RD_BUFF[1]);
 }
 
 
@@ -136,6 +145,17 @@ BYTE* MAXbytes_rd(BYTE reg, BYTE nbytes, BYTE* data) {
 	//if return code != 0 print an error
 	//deselect MAX3421E (may not be necessary if you are using SPI peripheral)
 	//return (data + nbytes);
+	XSpi_SetSlaveSelect(&SpiInstance ,0x01);
+	for (int n=0; n<nbytes-1; n++){
+		u8 WR_BUFF[2] = {reg, 0x00};
+		u8 RD_BUFF[2] = {NULL, data[n]};
+		if(XSpi_Transfer(&SpiInstance, WR_BUFF, NULL, 2)!=0){
+			xil_printf("return not zero");
+		}
+	}
+	XSpi_SetSlaveSelect(&SpiInstance ,0x00);
+	return (data+nbytes);
+
 }
 /* reset MAX3421E using chip reset bit. SPI configuration is not affected   */
 void MAX3421E_reset(void) {
