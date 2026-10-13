@@ -76,14 +76,11 @@ void MAXreg_wr(BYTE reg, BYTE val) {
 
 	XSpi_SetSlaveSelect(&SpiInstance ,0x01);
 	u8 WR_BUFF[2] = {reg+2, val};
-	if(XSpi_Transfer(&SpiInstance, WR_BUFF, NULL, 2)!=0){
-		xil_printf("return not zero");
-		XSpi_SetSlaveSelect(&SpiInstance ,0x00);
-		return;
+	u8 RD_BUFF[2] = {0x00, 0x00};
+	if(XSpi_Transfer(&SpiInstance, WR_BUFF, RD_BUFF, 2)!=0){
+		xil_printf("MAXreg_wr return error\n");
 	}
 	XSpi_SetSlaveSelect(&SpiInstance ,0x00);
-	return;
-
 }
 
 
@@ -100,11 +97,14 @@ BYTE* MAXbytes_wr(BYTE reg, BYTE nbytes, BYTE* data) {
 	//return (data + nbytes);
 
 	XSpi_SetSlaveSelect(&SpiInstance ,0x01);
-	for (int n=0; n<nbytes-1; n++){
-		u8 WR_BUFF[2] = {reg+2, data[n]};
-		if(XSpi_Transfer(&SpiInstance, WR_BUFF, NULL, 2)!=0){
-			xil_printf("return not zero");
-		}
+	u8 WR_BUFF[256] ={0};
+	u8 RD_BUFF[256] = {0};
+	WR_BUFF[0] = u8 (reg+2);
+	for (int n=0; n<nbytes; n++){
+		WR_BUFF[n+1] = data[n];
+	}
+	if(XSpi_Transfer(&SpiInstance, WR_BUFF, RD_BUFF, nbytes + 1)!=0){
+		xil_printf("MAXbytes_wr return error");
 	}
 	XSpi_SetSlaveSelect(&SpiInstance ,0x00);
 	return (data+nbytes);
@@ -122,11 +122,11 @@ BYTE MAXreg_rd(BYTE reg) {
 	//return val
 	XSpi_SetSlaveSelect(&SpiInstance ,0x01);
 	u8 WR_BUFF[2] = {reg, 0x00};
-	u8 RD_BUFF[2] = {NULL, NULL}; // not sure if it is 0x13
+	u8 RD_BUFF[2] = {0};
 	if(XSpi_Transfer(&SpiInstance, WR_BUFF, RD_BUFF, 2)!=0){
-		xil_printf("return not zero");
+		xil_printf("MAXreg_rd return error");
 		XSpi_SetSlaveSelect(&SpiInstance ,0x00);
-		return;
+		return 0;
 	}
 	XSpi_SetSlaveSelect(&SpiInstance ,0x00);
 	return (RD_BUFF[1]);
@@ -146,13 +146,17 @@ BYTE* MAXbytes_rd(BYTE reg, BYTE nbytes, BYTE* data) {
 	//deselect MAX3421E (may not be necessary if you are using SPI peripheral)
 	//return (data + nbytes);
 	XSpi_SetSlaveSelect(&SpiInstance ,0x01);
-	for (int n=0; n<nbytes-1; n++){
-		u8 WR_BUFF[2] = {reg, 0x00};
-		u8 RD_BUFF[2] = {NULL, data[n]};
-		if(XSpi_Transfer(&SpiInstance, WR_BUFF, NULL, 2)!=0){
-			xil_printf("return not zero");
-		}
+	u8 WR_BUFF[256] ={0};
+	u8 RD_BUFF[256] = {0};
+	WR_BUFF[0] = u8 (reg);
+	if(XSpi_Transfer(&SpiInstance, WR_BUFF, RD_BUFF, nbytes + 1)!=0){
+			xil_printf("MAXbytes_rd return error");
+			return data;
 	}
+	for (int n=0; n<nbytes; n++){
+		data[n] = RD_BUFF[n+1];
+	}
+
 	XSpi_SetSlaveSelect(&SpiInstance ,0x00);
 	return (data+nbytes);
 
