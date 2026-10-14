@@ -99,7 +99,7 @@ BYTE* MAXbytes_wr(BYTE reg, BYTE nbytes, BYTE* data) {
 	XSpi_SetSlaveSelect(&SpiInstance ,0x01);
 	u8 WR_BUFF[256] ={0};
 	u8 RD_BUFF[256] = {0};
-	WR_BUFF[0] = u8 (reg+2);
+	WR_BUFF[0] = (u8) (reg+2);
 	for (int n=0; n<nbytes; n++){
 		WR_BUFF[n+1] = data[n];
 	}
@@ -146,9 +146,9 @@ BYTE* MAXbytes_rd(BYTE reg, BYTE nbytes, BYTE* data) {
 	//deselect MAX3421E (may not be necessary if you are using SPI peripheral)
 	//return (data + nbytes);
 	XSpi_SetSlaveSelect(&SpiInstance ,0x01);
-	u8 WR_BUFF[256] ={0};
+	u8 WR_BUFF[256] = {0};
 	u8 RD_BUFF[256] = {0};
-	WR_BUFF[0] = u8 (reg);
+	WR_BUFF[0] = (u8)(reg);
 	if(XSpi_Transfer(&SpiInstance, WR_BUFF, RD_BUFF, nbytes + 1)!=0){
 			xil_printf("MAXbytes_rd return error");
 			return data;
